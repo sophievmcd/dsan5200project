@@ -10,7 +10,7 @@ To work with branches:
 2. from your local device/terminal/VSCode:
 3. use "git checkout <yourname>" to switch to your branch
 4. use "git pull" to ensure your branch is up to date and use "git merge" or "git merge main" to ensure you have everyone else's up to date
-5. use "git push" from your branch to save local changes (after doing "git add ." and "git commit -m "commit message"")
+5. use "git push" from your branch to save local changes (after doing "git add ." and "git commit -m "commit message"") *you may need to use the command "git push --set-upstream origin sophiem" the first time you push from your branch so that it pushes to main*
 6. navigate to main using "git checkout main"
 7. use "git merge <yourname>" to update the main branch with the changes from your branch, then use "git push" to ensure all is up to date
 
