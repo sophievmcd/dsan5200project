@@ -1,0 +1,97 @@
+---
+title: "Expenditure and Investment to Agriculture Data Cleaning"
+author: "Sophie McDowall"
+format:
+    html:
+        embed-resources: true
+---
+
+## Data and Plan
+
+Datasets to Import and Clean
+To import and clean:
+1. Government Expenditure
+2. Development Flows to Agriculture
+3. Foreign Direct Investment
+4. Production Data
+
+Process:
+- import from raw_data folder <br>
+- clean <br>
+- reorder into country/year units <br>
+- join all datasets <br>
+- export to clean_data folder <br>
+
+Output:
+Two .csv files uploaded to clean_data folder, including one with the years 2001-2022 and one with only the years 2017-2022
+
+
+### Development Flows to Agriculture
+https://www.fao.org/faostat/en/#data/EA 
+
+Output definition:
+Year
+Country: recipient country of money
+Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
+
+```{r}
+library(tidyverse)
+library(dplyr)
+
+flow_df <- read.csv("raw_data/FAOSTAT_data_en_3-13-2025.csv")
+flow_df <- subset(flow_df, select = -c(Domain, Donor, Element, Item, Unit, 
+Purpose))
+flow_df <- flow_df |> rename("total_disb_received" = "Value")
+flow_df <- flow_df |> rename("country" = "Recipient.Country")
+flow_df <- flow_df |> rename("year" = "Year")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Earlier code if needed
+
+library(tidyverse)
+library(dplyr)
+
+flow_df <- read.csv("raw_data/Development_Assistance_to_Agriculture_E_All_Data/Development_Assistance_to_Agriculture_E_All_Data_NOFLAG.csv")
+
+#subset to years 2001-2022
+flow_df1 <- flow_df[, c(3, 6, 8, 10, 12, 13, which(names(flow_df) == "Y2001"):which(names(flow_df) == "Y2022"))]
+
+#filtering for desired attributes
+flow_df2 <- flow_df1 |>
+    filter(Purpose == "Agriculture, forestry, fishing",) |>
+    filter(Donor == "All Donors") |>
+    filter(Element == "Value US$, 2022 prices") |>
+    filter(Item == "Disbursement")
+
+#removing unnecessary rows and columns, to only include year columns and rows that are one country
+flow_df_final <- flow_df2[1:170, ]
+flow_df_final <- subset(flow_df_final, select = -c(Purpose, Donor, Element, Item, Unit))
+
+
+
+
