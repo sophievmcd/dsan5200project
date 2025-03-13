@@ -17,3 +17,28 @@ To work with branches:
 8. if you are behind main, switch to your branch ("git checkout <yourname>") and then merge with main using "git merge main" and then "git push main" to update on website
 
 After these steps/using these commands, your branch should show 0 steps behind and 0 steps ahead of main. 
+
+
+**Get latest updates from main (starting in Danny branch):**
+git fetch origin  # Fetch latest changes from remote
+git checkout main  # Switch to main branch
+git pull origin main  # Pull latest changes
+
+git checkout danny
+
+git merge main
+
+git push origin danny
+
+**Merge local changes from Danny branch to main (starting in Danny branch):**
+git add .  # Stages all changes (or specify a file, e.g., git add myfile.py)
+git commit -m "Your commit message describing the changes"
+
+git push origin danny
+
+git checkout main  # Switch to the main branch
+git pull origin main  # Make sure main is up-to-date
+
+git merge danny
+
+git push origin main
