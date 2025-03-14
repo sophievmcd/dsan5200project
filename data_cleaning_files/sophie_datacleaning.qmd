@@ -45,8 +45,37 @@ flow_df <- flow_df |> rename("total_disb_received" = "Value")
 flow_df <- flow_df |> rename("country" = "Recipient.Country")
 flow_df <- flow_df |> rename("year" = "Year")
 
+flow_df_short <- flow_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
 ```
 
+
+### Government Expenditure
+https://www.fao.org/faostat/en/#data/EA 
+
+Output definition:
+Year
+Country: recipient country of money
+Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
+
+```{r}
+
+flow_df <- read.csv("raw_data/FAOSTAT_data_en_3-13-2025.csv")
+flow_df <- subset(flow_df, select = -c(Domain, Donor, Element, Item, Unit, 
+Purpose))
+flow_df <- flow_df |> rename("total_disb_received" = "Value")
+flow_df <- flow_df |> rename("country" = "Recipient.Country")
+flow_df <- flow_df |> rename("year" = "Year")
+
+flow_df_short <- flow_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+```
 
 
 
