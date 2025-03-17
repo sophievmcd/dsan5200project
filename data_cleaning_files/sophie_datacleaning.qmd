@@ -12,7 +12,7 @@ Datasets to Import and Clean
 To import and clean:
 1. Government Expenditure
 2. Development Flows to Agriculture
-3. Foreign Direct Investment
+3. Foreign Direct Investment (https://www.fao.org/faostat/en/#data/FDI)
 4. Production Data
 
 - [x] Government Expenditure
