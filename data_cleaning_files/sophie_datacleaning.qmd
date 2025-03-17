@@ -15,6 +15,13 @@ To import and clean:
 3. Foreign Direct Investment
 4. Production Data
 
+- [x] Government Expenditure
+- [x] Development Flows to Agriculture
+- [ ] Foreign Direct Investment
+- [ ] Production Data
+
+
+
 Process:
 - import from raw_data folder <br>
 - clean <br>
@@ -25,6 +32,12 @@ Process:
 Output:
 Two .csv files uploaded to clean_data folder, including one with the years 2001-2022 and one with only the years 2017-2022
 
+```{r}
+#imports
+library(tidyverse)
+library(dplyr)
+
+```
 
 ### Development Flows to Agriculture
 https://www.fao.org/faostat/en/#data/EA 
@@ -35,10 +48,7 @@ Country: recipient country of money
 Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
 
 ```{r}
-library(tidyverse)
-library(dplyr)
-
-flow_df <- read.csv("raw_data/FAOSTAT_data_en_3-13-2025.csv")
+flow_df <- read.csv("raw_data/FAOSTAT_devflows.csv")
 flow_df <- subset(flow_df, select = -c(Domain, Donor, Element, Item, Unit, 
 Purpose))
 flow_df <- flow_df |> rename("total_disb_received" = "Value")
@@ -56,30 +66,70 @@ flow_df_short <- flow_df |>
 ### Government Expenditure
 https://www.fao.org/faostat/en/#data/EA 
 
+Includes both General Government Total Expenditures and General Government Expenditures for Agriculture, Forestry, and Fishing
+
 Output definition:
 Year
 Country: recipient country of money
-Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
+Total Disb Received: total disbursements received from all donors in USD, 2022 USD
 
 ```{r}
 
-flow_df <- read.csv("raw_data/FAOSTAT_data_en_3-13-2025.csv")
-flow_df <- subset(flow_df, select = -c(Domain, Donor, Element, Item, Unit, 
-Purpose))
-flow_df <- flow_df |> rename("total_disb_received" = "Value")
-flow_df <- flow_df |> rename("country" = "Recipient.Country")
-flow_df <- flow_df |> rename("year" = "Year")
+#first for download of general government total expenditures
+expend_df1 <- read.csv("raw_data/FAOSTAT_gengovexpend.csv")
+expend_df1 <- subset(expend_df1, select = -c(Domain.Code, Domain, Area.Code..M49., Element.Code, Element, Item, Item.Code, Year.Code, Note, Unit)) 
+expend_df1 <- expend_df1 |> rename("total_expenditures" = "Value")
+expend_df1 <- expend_df1 |> rename("country" = "Area")
+expend_df1 <- expend_df1 |> rename("year" = "Year")
 
-flow_df_short <- flow_df |>
+expend_df1_short <- expend_df1 |>
     filter(year %in% c(
         "2017", "2018", "2019", "2020", "2021", "2022"
     ))
+
+
+#second for download of general government agriculture, forestry, fishing expenditures
+expend_df2 <- read.csv("raw_data/FAOSTAT_affgovexpend.csv")
+expend_df2 <- subset(expend_df2, select = -c(Domain.Code, Domain, Area.Code..M49., Element.Code, Element, Item, Item.Code, Year.Code, Note, Unit)) 
+expend_df2 <- expend_df2 |> rename("aff_expenditures" = "Value")
+expend_df2 <- expend_df2 |> rename("country" = "Area")
+expend_df2 <- expend_df2 |> rename("year" = "Year")
+
+expend_df2_short <- expend_df2 |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+#combine the two based on country 
+combined_expend <- full_join(expend_df1, expend_df2, by = c("country", "year"))
+combined_expend_short <- full_join(expend_df1_short, expend_df2_short, by = c("country", "year"))
+
 
 ```
 
 
 
 
+
+## Combining to One DF for Output
+
+```{r}
+final_finance_df <- flow_df |>
+    full_join(combined_expend, by = c("country", "year")) |>
+    full_join(combined_expend, by = c("country", "year"))
+
+
+final_finance_df_short <- flow_df_short |>
+    full_join(combined_expend_short, by = c("country", "year")) |>
+    full_join(combined_expend, by = c("country", "year"))
+
+
+write.csv(final_finance_df, "clean_data/finance_data_01to22.csv", row.names = FALSE)
+write.csv(final_finance_df_short, "clean_data/finance_data_17to22.csv", row.names = FALSE)
+
+
+
+```
 
 
 
