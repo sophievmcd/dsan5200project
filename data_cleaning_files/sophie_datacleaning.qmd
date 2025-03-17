@@ -108,6 +108,110 @@ combined_expend_short <- full_join(expend_df1_short, expend_df2_short, by = c("c
 ```
 
 
+### Foreign Direct Investment
+(https://www.fao.org/faostat/en/#data/FDI)
+
+Using both the total Foreign Direct Investment (FDI) inflows and outflows. 
+
+Output definition:
+Year
+Country: 
+
+Unit: US Dollars (not normalized)
+
+```{r}
+fdi_in_df <- read.csv("raw_data/FAOSTAT_totalfdiinflows.csv")
+fdi_in_df <- subset(fdi_in_df, select = -c(Domain, Element, Item, Unit))
+fdi_in_df <- fdi_in_df |> rename("total_fdi_inflow" = "Value")
+fdi_in_df <- fdi_in_df |> rename("country" = "Area")
+fdi_in_df <- fdi_in_df |> rename("year" = "Year")
+
+fdi_in_df_short <- fdi_in_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+#outflow
+fdi_out_df <- read.csv("raw_data/FAOSTAT_totalfdioutflows.csv")
+fdi_out_df <- subset(fdi_out_df, select = -c(Domain, Element, Item, Unit))
+fdi_out_df <- fdi_out_df |> rename("total_fdi_outflow" = "Value")
+fdi_out_df <- fdi_out_df |> rename("country" = "Area")
+fdi_out_df <- fdi_out_df |> rename("year" = "Year")
+
+fdi_out_df_short <- fdi_out_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+#combine the two based on country 
+combined_fdi <- full_join(fdi_in_df, fdi_out_df, by = c("country", "year"))
+combined_fdi_short <- full_join(fdi_in_df, fdi_out_df, by = c("country", "year"))
+
+```
+
+
+### Production Data
+https://www.fao.org/faostat/en/#data/EA 
+
+Using gross per-capita production index number (base year is 2014-2016)
+for: Agriculture, 
+
+Output definition:
+Year
+Country: recipient country of money
+Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
+
+```{r}
+# agriculture
+prod1_df <- read.csv("raw_data/FAOSTAT_percap_ag_production.csv")
+prod1_df <- subset(prod1_df, select = -c(Domain, Element, Item, Unit))
+prod1_df <- prod1_df |> rename("agriculture_per_capita_production_index" = "Value")
+prod1_df <- prod1_df |> rename("country" = "Area")
+prod1_df <- prod1_df |> rename("year" = "Year")
+
+prod1_df_short <- prod1_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+# cereals
+prod2_df <- read.csv("raw_data/FAOSTAT_percap_cereal_production.csv")
+prod2_df <- subset(prod2_df, select = -c(Domain, Element, Item, Unit))
+prod2_df <- prod2_df |> rename("cereals_per_capita_production_index" = "Value")
+prod2_df <- prod2_df |> rename("country" = "Area")
+prod2_df <- prod2_df |> rename("year" = "Year")
+
+prod2_df_short <- prod2_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+# fruit veg
+prod3_df <- read.csv("raw_data/FAOSTAT_percap_fruitveg_production.csv")
+prod3_df <- subset(prod3_df, select = -c(Domain, Element, Item, Unit))
+prod3_df <- prod3_df |> rename("fruitveg_per_capita_production_index" = "Value")
+prod3_df <- prod3_df |> rename("country" = "Area")
+prod3_df <- prod3_df |> rename("year" = "Year")
+
+prod3_df_short <- prod3_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+
+
+#combining
+all_production_df <- prod1_df |>
+    full_join(prod2_df, by = c("country", "year")) |>
+    full_join(prod3_df, by = c("country", "year"))
+
+all_production_df_short <- prod1_df_short |>
+    full_join(prod2_df_short, by = c("country", "year")) |>
+    full_join(prod3_df_short, by = c("country", "year"))
+
+
+
+```
 
 
 
@@ -116,18 +220,18 @@ combined_expend_short <- full_join(expend_df1_short, expend_df2_short, by = c("c
 ```{r}
 final_finance_df <- flow_df |>
     full_join(combined_expend, by = c("country", "year")) |>
-    full_join(combined_expend, by = c("country", "year"))
+    full_join(combined_fdi, by = c("country", "year")) |>
+    full_join(all_production_df, by = c("country", "year"))
 
 
 final_finance_df_short <- flow_df_short |>
     full_join(combined_expend_short, by = c("country", "year")) |>
-    full_join(combined_expend, by = c("country", "year"))
+    full_join(combined_fdi_short, by = c("country", "year")) |>
+    full_join(all_production_df_short, by = c("country", "year"))
 
 
 write.csv(final_finance_df, "clean_data/finance_data_01to22.csv", row.names = FALSE)
 write.csv(final_finance_df_short, "clean_data/finance_data_17to22.csv", row.names = FALSE)
-
-
 
 ```
 
