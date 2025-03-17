@@ -198,16 +198,43 @@ prod3_df_short <- prod3_df |>
         "2017", "2018", "2019", "2020", "2021", "2022"
     ))
 
+# meat indigenous
+prod4_df <- read.csv("raw_data/FAOSTAT_percap_meatindig_production.csv")
+prod4_df <- subset(prod4_df, select = -c(Domain, Element, Item, Unit))
+prod4_df <- prod4_df |> rename("meatindig_per_capita_production_index" = "Value")
+prod4_df <- prod4_df |> rename("country" = "Area")
+prod4_df <- prod4_df |> rename("year" = "Year")
+
+prod4_df_short <- prod4_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+# sugar crops
+prod5_df <- read.csv("raw_data/FAOSTAT_percap_sugar_production.csv")
+prod5_df <- subset(prod5_df, select = -c(Domain, Element, Item, Unit))
+prod5_df <- prod5_df |> rename("sugarcrop_per_capita_production_index" = "Value")
+prod5_df <- prod5_df |> rename("country" = "Area")
+prod5_df <- prod5_df |> rename("year" = "Year")
+
+prod5_df_short <- prod5_df |>
+    filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
 
 
 #combining
 all_production_df <- prod1_df |>
     full_join(prod2_df, by = c("country", "year")) |>
-    full_join(prod3_df, by = c("country", "year"))
+    full_join(prod3_df, by = c("country", "year")) |>
+    full_join(prod4_df, by = c("country", "year")) |>
+    full_join(prod5_df, by = c("country", "year"))
 
 all_production_df_short <- prod1_df_short |>
     full_join(prod2_df_short, by = c("country", "year")) |>
-    full_join(prod3_df_short, by = c("country", "year"))
+    full_join(prod3_df_short, by = c("country", "year")) |>
+    full_join(prod4_df_short, by = c("country", "year")) |>
+    full_join(prod5_df_short, by = c("country", "year"))
 
 
 
