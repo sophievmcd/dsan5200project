@@ -16,11 +16,11 @@ title: "Data Dictionary"
 |10| fruitveg_per_capita_production_index    |gross per-capita production index number for fruit and vegetable products (base year 2014-2016)|*CHECK*||
 |11| meatindig_per_capita_production_index   |gross per-capita production index number for indigenous meat products (base year 2014-2016)|*CHECK*||
 |12| sugarcrop_per_capita_production_index   |gross per-capita production index number for sugar crops (base year 2014-2016)|*CHECK*||
-|13| *attribute name*|*definition*|*unit*|*notes*|
-|14| *attribute name*|*definition*|*unit*|*notes*|
-|15| *attribute name*|*definition*|*unit*|*notes*|
-|16| *attribute name*|*definition*|*unit*|*notes*|
-|17| *attribute name*|*definition*|*unit*|*notes*|
+|13| total population - both sexes|male and female total population|thousands of people|*notes*|
+|14| total population - male|male population|thousands of people|*notes*|
+|15| total population - female|female population|thousands of people|*notes*|
+|16| rural population|rural population|thousands of people|*notes*|
+|17| urban population|urban population|thousands of people|*notes*|
 |18| *attribute name*|*definition*|*unit*|*notes*|
 |19| *attribute name*|*definition*|*unit*|*notes*|
 |20| *attribute name*|*definition*|*unit*|*notes*|

@@ -17,8 +17,8 @@ To import and clean:
 
 - [x] Government Expenditure
 - [x] Development Flows to Agriculture
-- [ ] Foreign Direct Investment
-- [ ] Production Data
+- [x] Foreign Direct Investment
+- [x] Production Data
 
 
 
@@ -42,10 +42,17 @@ library(dplyr)
 ### Development Flows to Agriculture
 https://www.fao.org/faostat/en/#data/EA 
 
-Output definition:
-Year
-Country: recipient country of money
-Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
+
+**Selected for data download:** <br>
+Recipient Country: ALL
+Donor: All Donnors + (Total)
+Elements: Value US$
+Items: Disbursement + (Total)
+Purpose: Agriculture, forestry, fishing + (Total)
+Years: 2001-2022
+<br>  
+
+UNIT: millions of USD
 
 ```{r}
 flow_df <- read.csv("raw_data/FAOSTAT_devflows.csv")
@@ -71,7 +78,7 @@ Includes both General Government Total Expenditures and General Government Expen
 Output definition:
 Year
 Country: recipient country of money
-Total Disb Received: total disbursements received from all donors in USD, 2022 USD
+Total Disb Received: total disbursements received from all donors in USD
 
 ```{r}
 
