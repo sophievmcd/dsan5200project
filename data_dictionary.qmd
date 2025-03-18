@@ -6,16 +6,16 @@ title: "Data Dictionary"
 |--|----------------|----------------|------|-------|
 | 1| country                                 |country of study|NA| |
 | 2| year                                    |year of study|NA| | 
-| 3| total_disb_received                     |total disbursements received by the country|*CHECK* 2022 USD, millions||
+| 3| total_disb_received                     |total disbursements received by the country|USD, millions||
 | 4| total_expenditures                      |general government total expenditures|USD, millions||
 | 5| aff_expenditures                        |general government for agriculture, forestry, and fishing|USD, millions||
 | 6| total_fdi_inflow                        |total foreign direct investment inflow|USD, millions||
 | 7| total_fdi_outflow                       |total foreign direct investment outlow|USD, millions||
-| 8| agriculture_per_capita_production_index |gross per-capita production index number for agriculture (base year 2014-2016)|*CHECK*||
-| 9| cereals_per_capita_production_index     |gross per-capita production index number for cereal products (base year 2014-2016)|*CHECK*||
-|10| fruitveg_per_capita_production_index    |gross per-capita production index number for fruit and vegetable products (base year 2014-2016)|*CHECK*||
-|11| meatindig_per_capita_production_index   |gross per-capita production index number for indigenous meat products (base year 2014-2016)|*CHECK*||
-|12| sugarcrop_per_capita_production_index   |gross per-capita production index number for sugar crops (base year 2014-2016)|*CHECK*||
+| 8| agriculture_per_capita_production_index |gross per-capita production index number for agriculture (base year 2014-2016)|index||
+| 9| cereals_per_capita_production_index     |gross per-capita production index number for cereal products (base year 2014-2016)|index||
+|10| fruitveg_per_capita_production_index    |gross per-capita production index number for fruit and vegetable products (base year 2014-2016)|index||
+|11| meatindig_per_capita_production_index   |gross per-capita production index number for indigenous meat products (base year 2014-2016)|index||
+|12| sugarcrop_per_capita_production_index   |gross per-capita production index number for sugar crops (base year 2014-2016)|index||
 |13| total population - both sexes|male and female total population|thousands of people|*notes*|
 |14| total population - male|male population|thousands of people|*notes*|
 |15| total population - female|female population|thousands of people|*notes*|
