@@ -55,6 +55,38 @@ FS_clean_wide <- FS_clean_wide %>%
   rename_all(tolower) %>%
   rename(country = area)
 
+# cleaning col names
+clean_and_shorten_column_names <- function(df) {
+  colnames(df) <- colnames(df) %>%
+    str_trim() %>% 
+    tolower() %>%
+    str_replace_all("[^\\w\\s]", "") %>%
+    str_replace_all("\\s+", "_") %>%
+    recode(
+      "dietary_energy_supply_used_in_the_estimation_of_prevalence_of_undernourishment_kcalcapday" = "diet_energy_supply",
+      "gross_domestic_product_per_capita_ppp_constant_2017_international_" = "gdp_per_capita",
+      "political_stability_and_absence_of_violenceterrorism_index" = "political_stability",
+      "per_capita_food_supply_variability_kcalcapday" = "food_supply_variability",
+      "percentage_of_population_using_safely_managed_drinking_water_services_percent" = "safe_water_access",
+      "percentage_of_population_using_at_least_basic_drinking_water_services_percent" = "basic_water_access",
+      "percentage_of_population_using_at_least_basic_sanitation_services_percent" = "basic_sanitation_access",
+      "percentage_of_children_under_5_years_affected_by_wasting_percent" = "child_wasting",
+      "prevalence_of_moderate_or_severe_food_insecurity_in_the_town_and_semidense_area_adult_population_percent_annual_value" = "food_insecurity_town",
+      "prevalence_of_moderate_or_severe_food_insecurity_in_the_urban_adult_population_percent_annual_value" = "food_insecurity_urban",
+      "prevalence_of_moderate_or_severe_food_insecurity_in_the_male_adult_population_percent_annual_value" = "food_insecurity_male",
+      "prevalence_of_moderate_or_severe_food_insecurity_in_the_female_adult_population_percent_annual_value" = "food_insecurity_female",
+      "number_of_severely_food_insecure_people_million_annual_value" = "severe_food_insecure_millions",
+      "number_of_severely_food_insecure_male_adults_million_annual_value" = "severe_food_insecure_male_millions",
+      "number_of_severely_food_insecure_female_adults_million_annual_value" = "severe_food_insecure_female_millions",
+      "number_of_moderately_or_severely_food_insecure_people_million_annual_value" = "mod_severe_food_insecure_millions",
+      "number_of_moderately_or_severely_food_insecure_male_adults_million_annual_value" = "mod_severe_food_insecure_male_millions",
+      "number_of_moderately_or_severely_food_insecure_female_adults_million_annual_value" = "mod_severe_food_insecure_female_millions"
+    )
+  return(df)
+}
+
+FS_clean_wide <- clean_and_shorten_column_names(FS_clean_wide)
+
 csv_path <- "../clean_data/Food_Security_Clean.csv"
 write.csv(FS_clean_wide, file = csv_path, row.names = FALSE)
 
@@ -101,16 +133,38 @@ SDG_clean_wide <- SDG_clean_wide %>%
   rename_all(tolower) %>%
   rename(country = area)
 
-csv_path <- "../clean_data/SDG_indicators_clean.csv"
-write.csv(SDG_clean_wide, file = csv_path, row.names = FALSE)
+# cleaning col names
+clean_and_shorten_column_names <- function(df) {
+  colnames(df) <- colnames(df) %>%
+    str_trim() %>% 
+    tolower() %>%
+    str_replace_all("[^\\w\\s]", "") %>%
+    str_replace_all("\\s+", "_") %>%
+    recode(
+      "number_of_undernourished_people_million_no" = "undernourished_millions",
+      "prevalence_of_undernourishment_" = "undernourishment_rate",
+      "number_of_severely_food_insecure_people_female_15_years_old_and_over_1000_no" = "severe_food_insecure_female_15plus_1000",
+      "number_of_severely_food_insecure_people_male_15_years_old_and_over_1000_no" = "severe_food_insecure_male_15plus_1000",
+      "number_of_severely_food_insecure_people_both_sexes_or_no_breakdown_by_sex_all_age_ranges_or_no_breakdown_by_age_1000_no" = "severe_food_insecure_total_1000",
+      "prevalence_of_severe_food_insecurity_both_sexes_or_no_breakdown_by_sex_all_age_ranges_or_no_breakdown_by_age_no_breakdown_by_urbanisation_" = "severe_food_insecurity_rate",
+      "prevalence_of_severe_food_insecurity_female_15_years_old_and_over_no_breakdown_by_urbanisation_" = "severe_food_insecurity_female_15plus",
+      "prevalence_of_severe_food_insecurity_male_15_years_old_and_over_no_breakdown_by_urbanisation_" = "severe_food_insecurity_male_15plus",
+      "prevalence_of_moderate_or_severe_food_insecurity_both_sexes_or_no_breakdown_by_sex_15_years_old_and_over_rural_" = "mod_severe_food_insecurity_rural",
+      "prevalence_of_moderate_or_severe_food_insecurity_both_sexes_or_no_breakdown_by_sex_15_years_old_and_over_town_and_semidense_area_" = "mod_severe_food_insecurity_town",
+      "prevalence_of_moderate_or_severe_food_insecurity_both_sexes_or_no_breakdown_by_sex_15_years_old_and_over_urban_" = "mod_severe_food_insecurity_urban",
+      "prevalence_of_minimum_dietary_diversity_among_women_aged_1549_years_" = "dietary_diversity_women",
+      "c1_proportion_of_countries_recording_abnormally_high_or_moderately_high_food_prices_no_breakdown_" = "high_food_prices_countries",
+      "c1_proportion_of_countries_recording_abnormally_high_or_moderately_high_food_prices_severity_of_price_levels_abnormal_high_food_prices_" = "high_food_prices_severe",
+      "c1_proportion_of_countries_recording_abnormally_high_or_moderately_high_food_prices_severity_of_price_levels_moderate_moderately_high_food_prices_" = "high_food_prices_moderate",
+      "a1_proportion_of_people_with_ownership_or_secure_rights_over_agricultural_land_by_sex_not_available_" = "secure_land_rights",
+      "a_food_loss_percentage_" = "food_loss_percentage",
+      "a_global_food_loss_index_" = "food_loss_index"
+    )
+  return(df)
+}
 
-SDG_short <- SDG_clean_wide %>%
-  filter(year %in% c(
-        "2017", "2018", "2019", "2020", "2021", "2022"
-    ))
+SDG_clean_wide <- clean_and_shorten_column_names(SDG_clean_wide)
 
-csv_path <- "../clean_data/SDG_indicators_clean_short.csv"
-write.csv(SDG_short, file = csv_path, row.names = FALSE)
 
 ```
 
@@ -143,6 +197,26 @@ pop_clean_wide <- pop_clean_long %>%
 pop_clean_wide <- pop_clean_wide %>%
   rename_all(tolower) %>%
   rename(country = area)
+
+# cleaning col names
+clean_and_shorten_column_names <- function(df) {
+  colnames(df) <- colnames(df) %>%
+    str_trim() %>% 
+    tolower() %>%
+    str_replace_all("[^\\w\\s]", "") %>%
+    str_replace_all("\\s+", "_") %>%
+    recode(
+      "total_population_both_sexes_1000_no" = "total_pop_1000",
+      "total_population_male_1000_no" = "male_pop_1000",
+      "total_population_female_1000_no" = "female_pop_1000",
+      "rural_population_1000_no" = "rural_pop_1000",
+      "urban_population_1000_no" = "urban_pop_1000"
+    )
+  return(df)
+}
+
+pop_clean_wide <- clean_and_shorten_column_names(pop_clean_wide)
+pop_clean_wide <- pop_clean_wide %>% select(-unit)
 
 csv_path <- "../clean_data/population_clean.csv"
 write.csv(pop_clean_wide, file = csv_path, row.names = FALSE)
