@@ -7,18 +7,11 @@ Years being included:
 One table:
 - unit of analyses -- year + country
 
+**Datasets**
+- Food Security Indicators
+- SDG Indicators
+- Population and Employment
 
-
-## Datasets
-1. Food Security Indicators
-2. SDG Indicators
-3. Population and Employment
-
-
-## For 3/18
-1. Upload of raw data to raw data folder
-2. Individual qmd file with data cleaning for assigned datasets, included commenting
-3. Output of cleaned table to clean data folder in the format of a dataframe with unit as year+country (CSV)
 
 ## Food Security Indicators
 
@@ -27,7 +20,7 @@ library(tidyverse)
 library(dplyr)
 library(tidyr)
 
-file_path_fs <- "raw_data/Food_Security_All_Data.csv"
+file_path_fs <- "../raw_data/Food_Security_All_Data.csv"
 FS_raw <- read.csv(file_path_fs, fileEncoding = "ISO_8859-1")
 
 year_cols <- paste0("Y", 2001:2022)
@@ -39,12 +32,14 @@ FS_clean_long <- FS_clean %>%
                values_to = "Value")
 
 FS_clean_long <- FS_clean_long %>%
-  mutate(Year = as.integer(sub("Y", "", Year))) %>%
-  mutate(Value = as.numeric(gsub("<", "", Value)))
+  mutate(Year = as.integer(sub("Y", "", Year))) 
 
 # NAs are all because they are the three year averages, so taking them out
 FS_clean_long <- FS_clean_long %>%
   drop_na(Value)
+
+FS_clean_long <- FS_clean_long %>%
+  mutate(Value = as.numeric(gsub("<", "", Value)))
 
 # taking out duplicate rows
 FS_clean_long <- FS_clean_long %>%
@@ -54,19 +49,74 @@ FS_clean_wide <- FS_clean_long %>%
   select(Area, Year, Item, Value) %>%
   pivot_wider(names_from = Item, values_from = Value)
 
+csv_path <- "../clean_data/Food_Security_Clean.csv"
+write.csv(FS_clean_wide, file = csv_path, row.names = FALSE)
+
 ```
 
 
 ## SDG Indicators
 ```{r}
-file_path_sdg <- "raw_data/SDG_All_Data.csv"
+file_path_sdg <- "../raw_data/SDG_All_Data.csv"
 SDG_raw <- read.csv(file_path_sdg, fileEncoding = "ISO_8859-1")
+
+year_cols <- paste0("Y", 2001:2022)
+SDG_clean <- SDG_raw %>% select(Area, Item, Element, Unit, all_of(year_cols))
+
+SDG_clean_long <- SDG_clean %>%
+  pivot_longer(cols = all_of(year_cols),
+               names_to = "Year",
+               values_to = "Value") %>%
+  mutate(Year = as.integer(sub("Y", "", Year))) %>%
+  mutate(Value = as.numeric(gsub("<", "", Value)))
+
+SDG_clean_long <- SDG_clean_long %>%
+  mutate(Item = paste0(Item, " (", Unit, ")")) 
+
+SDG_clean_long <- SDG_clean_long %>%
+  distinct(Area, Year, Item, .keep_all = TRUE)
+
+SDG_clean_wide <- SDG_clean_long %>%
+  select(Area, Year, Item, Value) %>%
+  pivot_wider(names_from = Item, values_from = Value) 
+
+names(SDG_clean_wide) <- names(SDG_clean_wide) %>%
+  gsub("^[0-9.]+\\s*", "", .)
+
+csv_path <- "../clean_data/SDG_indicators_clean.csv"
+write.csv(SDG_clean_wide, file = csv_path, row.names = FALSE)
+
 ```
 
 ## Population Data
 ```{r}
-file_path_pop <- "raw_data/Population_All_Data.csv"
+file_path_pop <- "../raw_data/Population_All_Data.csv"
 pop_raw <- read.csv(file_path_pop, fileEncoding = "ISO_8859-1")
+
+years_col <- paste0("Y", 2001:2022)
+pop_clean <- pop_raw %>% select(Area, Element, Unit, all_of(year_cols))
+
+pop_clean_long <- pop_clean %>%
+  pivot_longer(cols = all_of(year_cols),
+               names_to = "Year",
+               values_to = "Value") %>%
+  mutate(Year = as.integer(sub("Y", "", Year)))
+
+pop_clean_long <- pop_clean_long %>%
+  mutate(Element = paste0(Element, " (", Unit, ")"))
+
+pop_clean_long <- pop_clean_long %>%
+  mutate(Value = as.numeric(Value))
+
+pop_clean_long <- pop_clean_long %>%
+  distinct(Area, Year, Element, .keep_all = TRUE)
+
+pop_clean_wide <- pop_clean_long %>%
+  pivot_wider(names_from = Element, values_from = Value)
+
+csv_path <- "../clean_data/population_clean.csv"
+write.csv(pop_clean_wide, file = csv_path, row.names = FALSE)
+
 ```
 
 
