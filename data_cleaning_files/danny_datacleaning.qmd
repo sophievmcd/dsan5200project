@@ -36,6 +36,8 @@ FS_clean_long <- FS_clean_long %>%
 
 # NAs are all because they are the three year averages, so taking them out
 FS_clean_long <- FS_clean_long %>%
+  mutate(Value = ifelse(Value == "", NA, Value))
+FS_clean_long <- FS_clean_long %>%
   drop_na(Value)
 
 FS_clean_long <- FS_clean_long %>%
@@ -49,8 +51,20 @@ FS_clean_wide <- FS_clean_long %>%
   select(Area, Year, Item, Value) %>%
   pivot_wider(names_from = Item, values_from = Value)
 
+FS_clean_wide <- FS_clean_wide %>%
+  rename_all(tolower) %>%
+  rename(country = area)
+
 csv_path <- "../clean_data/Food_Security_Clean.csv"
 write.csv(FS_clean_wide, file = csv_path, row.names = FALSE)
+
+FS_short <- FS_clean_wide %>%
+  filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+csv_path <- "../clean_data/Food_Security_Clean_short.csv"
+write.csv(FS_short, file = csv_path, row.names = FALSE)
 
 ```
 
@@ -83,8 +97,20 @@ SDG_clean_wide <- SDG_clean_long %>%
 names(SDG_clean_wide) <- names(SDG_clean_wide) %>%
   gsub("^[0-9.]+\\s*", "", .)
 
+SDG_clean_wide <- SDG_clean_wide %>%
+  rename_all(tolower) %>%
+  rename(country = area)
+
 csv_path <- "../clean_data/SDG_indicators_clean.csv"
 write.csv(SDG_clean_wide, file = csv_path, row.names = FALSE)
+
+SDG_short <- SDG_clean_wide %>%
+  filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+csv_path <- "../clean_data/SDG_indicators_clean_short.csv"
+write.csv(SDG_short, file = csv_path, row.names = FALSE)
 
 ```
 
@@ -114,8 +140,20 @@ pop_clean_long <- pop_clean_long %>%
 pop_clean_wide <- pop_clean_long %>%
   pivot_wider(names_from = Element, values_from = Value)
 
+pop_clean_wide <- pop_clean_wide %>%
+  rename_all(tolower) %>%
+  rename(country = area)
+
 csv_path <- "../clean_data/population_clean.csv"
 write.csv(pop_clean_wide, file = csv_path, row.names = FALSE)
+
+pop_short <- pop_clean_wide %>%
+  filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+csv_path <- "../clean_data/population_clean_short.csv"
+write.csv(pop_short, file = csv_path, row.names = FALSE)
 
 ```
 

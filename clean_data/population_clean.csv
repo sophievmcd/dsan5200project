@@ -1,4 +1,4 @@
-"Area","Unit","Year","Total Population - Both sexes (1000 No)","Total Population - Male (1000 No)","Total Population - Female (1000 No)","Rural population (1000 No)","Urban population (1000 No)"
+"country","unit","year","total population - both sexes (1000 no)","total population - male (1000 no)","total population - female (1000 no)","rural population (1000 no)","urban population (1000 no)"
 "Afghanistan","1000 No",2001,20284.307,10179.792,10104.514,16318.324,4648.139
 "Afghanistan","1000 No",2002,21378.117,10737.198,10640.919,17086.91,4893.013
 "Afghanistan","1000 No",2003,22733.049,11426.685,11306.364,17909.063,5155.788
