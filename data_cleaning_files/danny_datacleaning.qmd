@@ -1,0 +1,72 @@
+# Danny Data Cleaning
+
+Years being included:
+- 2001-2022
+- 2017-2022
+
+One table:
+- unit of analyses -- year + country
+
+
+
+## Datasets
+1. Food Security Indicators
+2. SDG Indicators
+3. Population and Employment
+
+
+## For 3/18
+1. Upload of raw data to raw data folder
+2. Individual qmd file with data cleaning for assigned datasets, included commenting
+3. Output of cleaned table to clean data folder in the format of a dataframe with unit as year+country (CSV)
+
+## Food Security Indicators
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+
+file_path_fs <- "raw_data/Food_Security_All_Data.csv"
+FS_raw <- read.csv(file_path_fs, fileEncoding = "ISO_8859-1")
+
+year_cols <- paste0("Y", 2001:2022)
+FS_clean <- FS_raw %>% select(Area, Item, Element, Unit, all_of(year_cols))
+
+FS_clean_long <- FS_clean %>%
+  pivot_longer(cols = all_of(year_cols),
+               names_to = "Year",
+               values_to = "Value")
+
+FS_clean_long <- FS_clean_long %>%
+  mutate(Year = as.integer(sub("Y", "", Year))) %>%
+  mutate(Value = as.numeric(gsub("<", "", Value)))
+
+# NAs are all because they are the three year averages, so taking them out
+FS_clean_long <- FS_clean_long %>%
+  drop_na(Value)
+
+# taking out duplicate rows
+FS_clean_long <- FS_clean_long %>%
+  distinct(Area, Year, Item, .keep_all = TRUE)
+
+FS_clean_wide <- FS_clean_long %>%
+  select(Area, Year, Item, Value) %>%
+  pivot_wider(names_from = Item, values_from = Value)
+
+```
+
+
+## SDG Indicators
+```{r}
+file_path_sdg <- "raw_data/SDG_All_Data.csv"
+SDG_raw <- read.csv(file_path_sdg, fileEncoding = "ISO_8859-1")
+```
+
+## Population Data
+```{r}
+file_path_pop <- "raw_data/Population_All_Data.csv"
+pop_raw <- read.csv(file_path_pop, fileEncoding = "ISO_8859-1")
+```
+
+
