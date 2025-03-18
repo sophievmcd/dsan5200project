@@ -17,8 +17,8 @@ To import and clean:
 
 - [x] Government Expenditure
 - [x] Development Flows to Agriculture
-- [ ] Foreign Direct Investment
-- [ ] Production Data
+- [x] Foreign Direct Investment
+- [x] Production Data
 
 
 
@@ -42,10 +42,17 @@ library(dplyr)
 ### Development Flows to Agriculture
 https://www.fao.org/faostat/en/#data/EA 
 
-Output definition:
-Year
-Country: recipient country of money
-Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
+
+**Selected for data download:** <br>
+Recipient Country: ALL
+Donor: All Donors + (Total)
+Elements: Value US$
+Items: Disbursement + (Total)
+Purpose: Agriculture, forestry, fishing + (Total)
+Years: 2001-2022
+<br>  
+
+UNIT: millions of USD
 
 ```{r}
 flow_df <- read.csv("raw_data/FAOSTAT_devflows.csv")
@@ -64,14 +71,16 @@ flow_df_short <- flow_df |>
 
 
 ### Government Expenditure
-https://www.fao.org/faostat/en/#data/EA 
+https://www.fao.org/faostat/en/#data/IG
 
-Includes both General Government Total Expenditures and General Government Expenditures for Agriculture, Forestry, and Fishing
+**Selected for data download:** <br>
+Recipient Country: ALL
+Elements: Value US$
+Items: Total Expenditure (General Government), Agriculture, forestry, fishing (General Government)
+Years: 2001-2022
+<br>  
 
-Output definition:
-Year
-Country: recipient country of money
-Total Disb Received: total disbursements received from all donors in USD, 2022 USD
+UNIT: millions of USD
 
 ```{r}
 
@@ -111,13 +120,14 @@ combined_expend_short <- full_join(expend_df1_short, expend_df2_short, by = c("c
 ### Foreign Direct Investment
 (https://www.fao.org/faostat/en/#data/FDI)
 
-Using both the total Foreign Direct Investment (FDI) inflows and outflows. 
+**Selected for data download:** <br>
+Recipient Country: ALL
+Elements: Value US$
+Items: Total FDI inflows, Total FDI outflows
+Years: 2001-2022
+<br>  
 
-Output definition:
-Year
-Country: 
-
-Unit: US Dollars (not normalized)
+UNIT: millions of USD
 
 ```{r}
 fdi_in_df <- read.csv("raw_data/FAOSTAT_totalfdiinflows.csv")
@@ -160,6 +170,28 @@ Output definition:
 Year
 Country: recipient country of money
 Total Disb Received: total disbursementes received from all donors in USD, 2022 USD
+
+**Selected for data download:** <br>
+Recipient Country: ALL
+Elements: Gross per capita Production Index Number (2014-2016 = 100 base year)
+Items: Agriculture + (Total); Cereals, primary + (Total); Crops + (Total); Meat indigenous, total + (Total); Sugar Crops Primary + (Total); Vegetables and Fruit Primary + (Total)
+Years: 2001-2022
+<br>  
+
+UNIT: per capita index number
+Details from Metadata:
+"Data description <br>
+The FAO indices of agricultural production show the relative level of the aggregate volume of agricultural production for each year in comparison with the base period 2014-2016. Indices for meat production are computed based on data for production from indigenous animals.
+
+Coverage<br>
+The FAO indices of agricultural production show the relative level of the aggregate volume of agricultural production for each year in comparison with the base period 2004-2006. They are based on the sum of price-weighted quantities of different agricultural commodities produced after deductions of quantities used as seed and feed weighted in a similar manner. The resulting aggregate represents, therefore, disposable production for any use except as seed and feed.
+
+Sector coverage<br>
+FAO strives to provide data for all countries and crops and livestock commodities in terms of production (primary and processed), harvested areas, and live and slaughtered animal numbers.
+
+Statistical concepts and definitions<br>
+All the indices at the country, regional and world levels are calculated by the Laspeyres formula. Production quantities of each commodity are weighted by 2004-2006 average international commodity prices and summed for each year. To obtain the index, the aggregate for a given year is divided by the average aggregate for the base period 2004-2006."
+
 
 ```{r}
 # agriculture
