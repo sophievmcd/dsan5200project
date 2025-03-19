@@ -1,0 +1,155 @@
+
+title: "Data Cleaning: Cost and Affordability of a Healthy Diet"
+author: "Ella Kulicki"
+format:
+    html:
+        embed-resources: true
+---
+
+## Datasets to Import and Clean
+1. Cost and Affordability of a Healthy Diet - done
+2. Availability (of different nutrients)
+
+# Cost and Affordability of a Healthy Diet
+
+Elements (with unit):
+- Prevalence of unaffordability (%)
+- Number of people unable to afford a healthy diet (number in millions)
+
+
+```{r}
+
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+
+
+cahd_raw <- read.csv("raw_data/FAOSTAT_cost_and_affordability.csv", stringsAsFactors = FALSE)
+
+# keep only necessary columns
+cahd_df <- cahd_raw %>%
+    select(Area, Year, Item, Value) %>% 
+    rename(
+        country = Area,
+        year = Year,
+        item = Item,
+        value = Value
+    )
+
+# pivot columns to rows
+cahd_df <- cahd_df %>%
+    pivot_wider(
+        id_cols = c(country, year),  
+        names_from = item,           
+        values_from = value         
+    )
+
+# rename new columns
+cahd_df <- cahd_df %>%
+    rename(
+        prevalence_of_unaffordability = `Prevalence of unaffordability (PUA), percent`,
+        num_of_ppl_unable_to_afford_healthy_diet = `Number of people unable to afford a healthy diet (NUA), million`
+    )
+
+# convert to numeric
+
+cahd_df <- cahd_df %>%
+  mutate(
+    year = as.numeric(year),
+    prevalence_of_unaffordability = as.numeric(prevalence_of_unaffordability),
+    num_of_ppl_unable_to_afford_healthy_diet = as.numeric(num_of_ppl_unable_to_afford_healthy_diet)
+  )
+
+
+write.csv(cahd_df, "clean_data/cost_and_affordability_clean.csv", row.names = FALSE)
+
+
+
+
+```
+
+# Availability (of different nutrients)
+
+
+```{r}
+#| eval: true 
+
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+
+
+avail_raw <- read.csv("raw_data/availability_data_raw.csv", stringsAsFactors = FALSE)
+
+
+# keep only necessary columns
+avail_df <- avail_raw %>%
+    select(Area, Food.Group, Indicator, Y2017, Y2018, Y2019, Y2020, Y2021, Y2022) %>% 
+    rename(
+        country = Area,
+        food_group = Food.Group,
+        indicator = Indicator,
+        `2017` = Y2017, 
+        `2018` = Y2018, 
+        `2019` = Y2019, 
+        `2020` = Y2020, 
+        `2021` = Y2021, 
+        `2022` = Y2022
+    )
+
+avail_df <- avail_df %>%
+    pivot_longer(
+        cols = c("2017", "2018", "2019", "2020", "2021", "2022"),
+        names_to = "year",
+        values_to = "value" 
+    )
+
+# keep just "all food groups"
+avail_df <- avail_df %>%
+    filter(food_group == "All food groups")
+
+avail_df <- avail_df %>%
+    pivot_wider(
+        id_cols = c("country", "year"),
+        names_from = "indicator",
+        values_from = "value"
+    )
+# rename indicator columns
+
+avail_df <- avail_df %>%
+    rename(
+        energy_supply = `Energy supply`,
+        protein_supply = `Protein supply`,
+        fat_supply = `Fat supply`,
+        carbohydrate_supply = `Carbohydrate (available) supply`,
+        dietary_fibre_supply = `Dietary fibre supply`,
+        calcium_supply = `Calcium supply`,
+        iron_supply = `Iron supply`,
+        zinc_supply = `Zinc supply`,
+        magnesium_supply = `Magnesium supply`,
+        phosphorus_supply = `Phosphorus supply`,
+        potassium_supply = `Potassium supply`,
+        thiamin_supply = `Thiamin supply`,
+        riboflavin_supply = `Riboflavin supply`,
+        vitamin_c_supply = `Vitamin C supply`,
+        vitamin_a_supply_retinol_equivalents = `Vitamin A supply (retinol equivalents)`,
+        vitamin_a_supply_retinol_activity_equivalents = `Vitamin A supply (retinol activity equivalents)`,
+        copper_supply = `Copper supply`,
+        docosahexaenoic_acid_supply = `Docosahexaenoic acid (DHA) supply`,
+        vitamin_b6_supply = `Vitamin B6 supply`,
+        eicosapentaenoic_acid_supply = `Eicosapentaenoic acid (EPA) supply`,
+        selenium_supply = `Selenium supply`,
+        vitamin_b12_supply = `Vitamin B12 supply`,
+        total_saturated_fatty_acids_supply = `Total saturated fatty acids supply`,
+        total_monounsaturated_fatty_acids_supply = `Total monounsaturated fatty acids supply`,
+        total_polyunsaturated_fatty_acids_supply = `Total polyunsaturated fatty acids supply`
+    ) %>%
+    mutate(
+        year = as.numeric(year)
+    )
+
+
+write.csv(avail_df, "clean_data/availability_clean.csv", row.names = FALSE)
+
+
+```

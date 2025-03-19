@@ -9,6 +9,8 @@
 - finance data
 
 ## Ella Files
+- cost and affordability of a health diet
+- availability of nutrients
 
 
 ## Loading in datasets
@@ -17,19 +19,23 @@
 library(tidyverse)
 library(dplyr)
 
-finance_data <- read.csv("../clean_data/finance_data_01to22.csv")
-finance_data_short <- read.csv("../clean_data/finance_data_17to22.csv")
+finance_data <- read.csv("clean_data/finance_data_01to22.csv")
+finance_data_short <- read.csv("clean_data/finance_data_17to22.csv")
 
-population_data <- read.csv("../clean_data/population_clean.csv")
-population_data_short <- read.csv("../clean_data/population_clean_short.csv")
+population_data <- read.csv("clean_data/population_clean.csv")
+population_data_short <- read.csv("clean_data/population_clean_short.csv")
 
-food_security_data <- read.csv("../clean_data/Food_Security_Clean.csv")
-food_security_data_short <- read.csv("../clean_data/Food_Security_Clean_short.csv")
+food_security_data <- read.csv("clean_data/Food_Security_Clean.csv")
+food_security_data_short <- read.csv("clean_data/Food_Security_Clean_short.csv")
 
-sdg_data <- read.csv("../clean_data/SDG_Indicators_clean.csv")
-sdg_data_short <- read.csv("../clean_data/SDG_Indicators_clean_short.csv")
+sdg_data <- read.csv("clean_data/SDG_Indicators_clean.csv")
+sdg_data_short <- read.csv("clean_data/SDG_Indicators_clean_short.csv")
 
-## Ella files here
+affordability_data_short <- read.csv("clean_data/cost_and_affordability_clean.csv")
+
+availability_data_short <- read.csv("clean_data/availability_clean.csv")
+
+
 ```
 
 
@@ -43,12 +49,14 @@ all_data <- finance_data %>%
 all_data_short <- finance_data_short %>%
   full_join(population_data_short,  by = c("country", "year")) %>%
   full_join(food_security_data_short,  by = c("country", "year")) %>%
-  full_join(sdg_data_short,  by = c("country", "year"))
+  full_join(sdg_data_short,  by = c("country", "year")) %>%
+  full_join(affordability_data_short, by =c("country", "year")) %>%
+  full_join(availability_data_short, by =c("country", "year"))
 
 
-file_path <- "../clean_data/combined_data.csv"
+file_path <- "clean_data/combined_data.csv"
 write.csv(all_data, file = file_path, row.names = FALSE)
 
-file_path_short <- "../clean_data/combined_data_short.csv"
+file_path_short <- "clean_data/combined_data_short.csv"
 write.csv(all_data_short, file = file_path_short, row.names = FALSE)
 ```
