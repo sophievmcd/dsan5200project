@@ -87,10 +87,20 @@ clean_and_shorten_column_names <- function(df) {
 
 FS_clean_wide <- clean_and_shorten_column_names(FS_clean_wide)
 
-csv_path <- "../clean_data/Food_Security_Clean.csv"
-write.csv(FS_clean_wide, file = csv_path, row.names = FALSE)
+na_percentage <- function(df) {
+  sapply(df, function(col) {
+    mean(is.na(col)) * 100
+  })
+}
 
-FS_short <- FS_clean_wide %>%
+na_percents <- na_percentage(FS_clean_wide)
+cleaned_FS_final <- FS_clean_wide[, na_percents <= 50]
+cleaned_FS_final <- cleaned_FS_final[1:4488, ]
+
+csv_path <- "../clean_data/Food_Security_Clean.csv"
+write.csv(cleaned_FS_final, file = csv_path, row.names = FALSE)
+
+FS_short <- cleaned_FS_final %>%
   filter(year %in% c(
         "2017", "2018", "2019", "2020", "2021", "2022"
     ))
@@ -165,7 +175,27 @@ clean_and_shorten_column_names <- function(df) {
 
 SDG_clean_wide <- clean_and_shorten_column_names(SDG_clean_wide)
 
+na_percentage <- function(df) {
+  sapply(df, function(col) {
+    mean(is.na(col)) * 100
+  })
+}
 
+na_percents <- na_percentage(SDG_clean_wide)
+cleaned_SDG_final <- SDG_clean_wide[, na_percents <= 50]
+cleaned_SDG_final <- cleaned_SDG_final[1:5501, ]
+
+csv_path <- "../clean_data/SDG_indicators_clean.csv"
+write.csv(cleaned_SDG_final, file = csv_path, row.names = FALSE)
+
+SDG_short <- cleaned_SDG_final %>%
+  filter(year %in% c(
+        "2017", "2018", "2019", "2020", "2021", "2022"
+    ))
+
+csv_path <- "../clean_data/SDG_indicators_clean_short.csv"
+write.csv(SDG_short, file = csv_path, row.names = FALSE)
+ 
 ```
 
 ## Population Data
