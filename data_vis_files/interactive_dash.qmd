@@ -1,0 +1,19 @@
+---
+title: "Interactive Dashboard"
+author: "Sophie McDowall"
+format: 
+    html:
+        embed-resources: true
+---
+
+
+## loading in data
+
+```{r}
+library(jsonlite)
+
+all_data <- read_json("clean_data/all_data_short.json", simplifyVector = TRUE)
+
+
+
+```
