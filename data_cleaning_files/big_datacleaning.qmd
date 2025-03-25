@@ -18,6 +18,7 @@
 ```{r}
 library(tidyverse)
 library(dplyr)
+library(jsonlite)
 
 finance_data <- read.csv("clean_data/finance_data_01to22.csv")
 finance_data_short <- read.csv("clean_data/finance_data_17to22.csv")
@@ -60,7 +61,7 @@ file_path <- "clean_data/combined_data.csv"
 file_path_short <- "clean_data/combined_data_short.csv"
 #write.csv(all_data_short, file = file_path_short, row.names = FALSE)
 
-write_json(all_data_short, "all_data_short.json", pretty = TRUE)
+write_json(all_data_short, "clean_data/all_data_short.json", pretty = TRUE)
 
 ```
 
