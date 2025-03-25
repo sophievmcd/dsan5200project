@@ -55,8 +55,12 @@ all_data_short <- finance_data_short %>%
 
 
 file_path <- "clean_data/combined_data.csv"
-write.csv(all_data, file = file_path, row.names = FALSE)
+#write.csv(all_data, file = file_path, row.names = FALSE)
 
 file_path_short <- "clean_data/combined_data_short.csv"
-write.csv(all_data_short, file = file_path_short, row.names = FALSE)
+#write.csv(all_data_short, file = file_path_short, row.names = FALSE)
+
+write_json(all_data_short, "all_data_short.json", pretty = TRUE)
+
 ```
+

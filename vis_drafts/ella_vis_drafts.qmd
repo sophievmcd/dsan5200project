@@ -1,0 +1,177 @@
+---
+Title: "DSAN 5200 Project Visualization Drafts"
+format:
+    html:
+        embed-resources: true
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+
+
+```{r}
+
+# load packages, read in data 
+
+library(tidyverse)
+library(jsonlite)
+library(janitor)
+library(dplyr)
+library(stringr)
+library(vegabrite)
+library(ggplot2)
+
+data <- read.csv("clean_data/combined_data_short.csv", stringsAsFactors = FALSE)
+
+
+```
+
+# Vis 1
+## GDP per capita vs prevalence of unaffordability
+Notes:
+- Some outliers at high x values, low y values. Right now cropped out. Max x value: 141,486
+- Want to add dropdown menu to highlight regions by color
+
+```{r}
+
+
+library(jsonlite)
+library(janitor)
+library(dplyr)
+library(stringr)
+library(vegabrite)
+library(tidyr)
+
+data <- fromJSON("all_data_short.json")
+
+vl_chart(data) %>%
+    vl_mark_circle(filled = TRUE, opacity = 0.2) %>%
+    vl_encode_x(field = 'gdp_per_capita', type = 'quantitative', scale = list(domain = c(0, 100000))) %>%
+    vl_encode_y(field = 'prevalence_of_unaffordability', type = 'quantitative') %>%
+    vl_encode_size(
+        field = 'total_pop_1000', 
+        type = 'quantitative', 
+        title = ' '
+    ) %>% 
+    vl_encode_color(field = 'agriculture_per_capita_production_index') %>%
+    vl_encode_tooltip_array(c('country', 'year')) %>%
+    vl_add_interval_selection(spec = .,name = 'grid', bind = 'scales')
+
+
+  
+```
+
+
+# Vis 2
+## Political stability vs prevalence of unaffordability
+Notes: 
+- add regression line?
+
+```{r}
+vl_chart(data) %>%
+    vl_mark_circle(filled = TRUE, opacity = 0.5) %>%
+    vl_encode_x(field = 'political_stability', type = 'quantitative') %>%
+    vl_encode_y(field = 'prevalence_of_unaffordability', type = 'quantitative') %>%
+    vl_encode_size(
+        field = 'total_pop_1000', 
+        type = 'quantitative', 
+        title = 'Total Population'
+    ) %>% 
+    vl_encode_color(field = 'year', type = 'nominal', title = 'Year') %>%
+    vl_encode_tooltip_array(c('country', 'year')) %>%
+    vl_add_interval_selection(spec = .,name = 'grid', bind = 'scales')
+
+
+
+
+```
+
+# Vis 3
+## Prevalence of severe food insecurity for each country
+Notes: really wonky
+
+```{r}
+vl_chart(data) %>%
+    vl_mark_line() %>%
+    vl_encode_x(field = 'year', type = 'temporal', scale = list(domain = c(2017, 2022))) %>%
+    vl_encode_y(
+      field = 'prevalence_of_severe_food_insecurity_in_the_male_adult_population_percent_annual_value', type = 'quantitative'
+      ) %>%
+    vl_encode_color(field = 'country', type = 'nominal') %>%
+    vl_encode_tooltip_array(c('country')) %>%
+    vl_add_interval_selection(spec = .,name = 'grid', bind = 'scales')
+    
+
+
+
+```
+
+# Vis 4
+## Prevalence of severe food insecurity in urban vs rural settings
+
+stacked bar chart
+```{r}
+
+data_long <- data %>%
+  pivot_longer(cols = c('prevalence_of_severe_food_insecurity_in_the_urban_adult_population_percent_annual_value', 'prevalence_of_severe_food_insecurity_in_the_rural_adult_population_percent_annual_value'), 
+               names_to = 'location', 
+               values_to = 'prevalence_food_insecurity') %>%
+  filter(year == 2022)
+
+
+vl_chart(data_long) %>%
+    vl_mark_boxplot() %>%
+    vl_encode_x(
+        field = 'location',
+        type = 'nominal'
+        ) %>%  
+    vl_encode_y(field = 'prevalence_food_insecurity', type = 'quantitative', scale = list(domain = c(0, 45))) %>%
+    vl_axis_x(title = 'Setting')
+    
+
+
+
+```
+
+
+# Vis 5
+## Histogram of GDP per capita in all countries
+Notes: trying to add tooltip to show which countries in each bin
+```{r}
+vl_chart(data) %>%
+  vl_mark_bar() %>%
+  vl_encode_x(field = 'gdp_per_capita', type = 'quantitative', bin = list(maxbins = 50), title = 'GDP per capita') %>%
+  vl_encode_y(field = 'count', aggregate = 'count', type = 'quantitative', title = 'Number of countries')
+
+```
+
+
+# Vis 6
+## Heatmap attempt - ignore for now
+
+```{r}
+
+long_data <- data %>%
+  pivot_longer(cols = c(gdp_per_capita, agriculture_per_capita_production_index, total_fdi_inflow, aff_expenditures, total_expenditures), 
+               names_to = 'indicator', 
+               values_to = 'value')
+
+cor_matrix <- long_data %>%
+  spread(key = indicator, value = value) %>%
+  select(-country)
+  cor()
+
+print(cor_matrix)
+
+
+
+vl_chart(long_data) %>%
+    vl_mark_point() %>%
+    vl_encode_x(field = 'indicator', type = 'quantitative', scale = list(domain = range(long_data$value))) %>%  
+    vl_encode_y(field = 'indicator', type = 'quantitative', scale = list(domain = range(long_data$value))) %>%  
+    vl_encode_color(field = 'correlation', type = 'quantitative', scale = list(range = c('white', 'red')))
+
+
+```
+
