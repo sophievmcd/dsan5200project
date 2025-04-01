@@ -12,6 +12,9 @@
 - cost and affordability of a health diet
 - availability of nutrients
 
+## Country Codes
+- from "Countries_and_Codes" file
+
 
 ## Loading in datasets
 
@@ -36,6 +39,8 @@ affordability_data_short <- read.csv("clean_data/cost_and_affordability_clean.cs
 
 availability_data_short <- read.csv("clean_data/availability_clean.csv")
 
+country_codes <- read.csv("raw_data/Countries_and_Codes.csv")
+
 
 ```
 
@@ -54,7 +59,24 @@ all_data_short <- finance_data_short %>%
   full_join(affordability_data_short, by =c("country", "year")) %>%
   full_join(availability_data_short, by =c("country", "year"))
 
+```
 
+
+## Adding country codes (M49 + ISO3)
+```{r}
+all_data <- all_data %>%  
+  left_join(country_codes %>%
+              select(Area, m49_code = Area.Code..M49., iso3_code = ISO3), by = c("country" = "Area"))
+
+all_data_short <- all_data_short %>%  
+  left_join(country_codes %>%
+              select(Area, m49_code = Area.Code..M49., iso3_code = ISO3), by = c("country" = "Area"))
+
+
+```
+
+## Output to Clean File
+```{r}
 file_path <- "clean_data/combined_data.csv"
 #write.csv(all_data, file = file_path, row.names = FALSE)
 
