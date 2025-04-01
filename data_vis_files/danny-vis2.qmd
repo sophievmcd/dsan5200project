@@ -1,0 +1,218 @@
+---
+title: "Interactive Food Security Petal Plot"
+format: html
+execute:
+  freeze: auto
+---
+
+```{r setup}
+#| message: false
+#| warning: false
+#| 
+library(tidyverse)
+library(plotly)
+library(scales)
+library(dplyr)
+library(tidyr)
+library(htmlwidgets)
+library(purrr)
+library(htmltools)
+library(jsonlite)
+
+```
+
+## Load and Prepare Data
+
+```{r load-data}
+food_security <- read.csv("../clean_data/Food_Security_Clean.csv")
+
+region_lookup <- tibble(
+  country = unique(food_security$country),
+  region = case_when(
+    country %in% c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", "Central African Republic", "Chad", "Comoros", "Congo", "Democratic Republic of the Congo", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Togo", "Uganda", "United Republic of Tanzania", "Zambia", "Zimbabwe", "Cabo Verde", "Côte d'Ivoire", "Libya", "Morocco", "Tunisia") ~ "Africa",
+    country %in% c("Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei Darussalam", "Cambodia", "China", "Democratic People's Republic of Korea", "Georgia", "India", "Indonesia", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan", "Kuwait", "Kyrgyzstan", "Lao People's Democratic Republic", "Lebanon", "Malaysia", "Maldives", "Mongolia", "Myanmar", "Nepal", "Oman", "Pakistan", "Philippines", "Qatar", "Republic of Korea", "Saudi Arabia", "Singapore", "Sri Lanka", "Syrian Arab Republic", "Tajikistan", "Thailand", "Timor-Leste", "Turkmenistan", "United Arab Emirates", "Uzbekistan", "Viet Nam", "Yemen", "Bahrain", "China, Hong Kong SAR", "China, Macao SAR", "China, Taiwan Province of", "China, mainland", "Iran (Islamic Republic of)", "Palestine", "Türkiye") ~ "Asia",
+    country %in% c("Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Montenegro", "North Macedonia", "Norway", "Poland", "Portugal", "Republic of Moldova", "Romania", "San Marino", "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom of Great Britain and Northern Ireland", "Czechia", "Russian Federation") ~ "Europe",
+    country %in% c("Antigua and Barbuda", "Argentina", "Bahamas", "Barbados", "Belize", "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominica", "Dominican Republic", "Ecuador", "El Salvador", "Grenada", "Guatemala", "Guyana", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Suriname", "Trinidad and Tobago", "Uruguay", "Bolivia (Plurinational State of)", "Puerto Rico", "Venezuela (Bolivarian Republic of)") ~ "Latin America",
+    country %in% c("Australia", "Fiji", "Kiribati", "Marshall Islands", "Micronesia", "Nauru", "New Zealand", "Palau", "Papua New Guinea", "Samoa", "Solomon Islands", "Tonga", "Tuvalu", "Vanuatu", "American Samoa", "Cook Islands", "French Polynesia", "Micronesia (Federated States of)", "New Caledonia", "Niue", "Tokelau") ~ "Oceania",
+    country %in% c("United States of America", "Canada", "Bermuda", "Greenland", "Netherlands (Kingdom of the)") ~ "North America",
+    TRUE ~ NA_character_
+  )
+)
+
+
+food_security$country <- recode(food_security$country,
+  "United Kingdom of Great Britain and Northern Ireland" = "United Kingdom",
+  "United States of America" = "United States",
+  "Democratic People's Republic of Korea" = "North Korea",
+  "Republic of Korea" = "South Korea",
+  "Russian Federation" = "Russia"
+)
+
+
+fs_2018 <- food_security %>%
+  filter(year == 2018) %>%
+  left_join(region_lookup, by = "country") %>%
+  select(
+    country, region,
+    `Food Availability (kcal/day)` = diet_energy_supply,
+    `Food Stability (variability)` = food_supply_variability,
+    `Child Stunting (%)` = percentage_of_children_under_5_years_of_age_who_are_stunted_modelled_estimates_percent,
+    `Safe Water Access (%)` = safe_water_access,
+    `Sanitation Access (%)` = basic_sanitation_access,
+    `GDP per Capita` = gdp_per_capita,
+    `Anemia in Women (%)` = prevalence_of_anemia_among_women_of_reproductive_age_1549_years_percent
+  )
+
+```
+
+```{r normalize-data}
+normalize <- function(x, invert = FALSE) {
+  x <- rescale(x, to = c(0, 1), na.rm = TRUE)
+  if (invert) 1 - x else x
+}
+
+fs_2018_norm <- fs_2018 %>%
+  mutate(
+    across(
+      c(`Food Availability (kcal/day)`, `Safe Water Access (%)`, `Sanitation Access (%)`, `GDP per Capita`),
+      ~ normalize(.x)
+    ),
+    across(
+      c(`Food Stability (variability)`, `Child Stunting (%)`, `Anemia in Women (%)`),
+      ~ normalize(.x, invert = TRUE)
+    )
+  )
+```
+
+
+```{r overlay-plot, echo=FALSE}
+
+region_avg <- fs_2018_norm %>%
+  group_by(region) %>%
+  summarise(across(where(is.numeric), ~mean(.x, na.rm = TRUE)))
+
+country_region_map <- fs_2018 %>%
+  select(country, region) %>%
+  distinct()
+
+# Rank countries per metric, skipping NAs
+rankings <- fs_2018_norm %>%
+  pivot_longer(cols = -c(country, region), names_to = "Metric", values_to = "Value") %>%
+  group_by(Metric) %>%
+  mutate(
+    Rank = ifelse(is.na(Value), NA_integer_, rank(-Value, ties.method = "min")),
+    Total = sum(!is.na(Value))
+  ) %>%
+  ungroup()
+
+country_names <- unique(fs_2018$country)
+traces <- list()
+region_color <- "rgba(255, 100, 100, 0.6)"  # constant
+
+for (i in seq_along(country_names)) {
+  country <- country_names[i]
+  region <- country_region_map %>% filter(country == !!country) %>% pull(region)
+
+  # Full country data w/ ranking + hover labels
+  c_data_raw <- rankings %>%
+    filter(country == !!country) %>%
+    mutate(label = ifelse(
+      is.na(Value),
+      paste0(Metric, "<br>Value: NA"),
+      paste0(Metric, "<br>Rank: ", Rank, " of ", Total, "<br>Value: ", round(Value, 2))
+    ))
+
+  # Keep only non-NA for radar trace (NA shown in hover label if needed)
+  c_data <- c_data_raw %>%
+    filter(!is.na(Value)) %>%
+    arrange(Metric)
+
+  # Get the list of metrics the country has data for
+  available_metrics <- c_data$Metric
+
+  # Region values for only same metrics
+  r_data <- region_avg %>%
+    filter(region == !!region) %>%
+    pivot_longer(-region, names_to = "Metric", values_to = "Value") %>%
+    filter(Metric %in% available_metrics) %>%
+    arrange(Metric)
+
+  # Close the loop for both traces (important for fill)
+  if (nrow(c_data) > 0) {
+    c_data <- bind_rows(c_data, c_data[1, ])
+    r_data <- bind_rows(r_data, r_data[1, ])
+  }
+
+  # --- Country trace ---
+  traces[[length(traces) + 1]] <- list(
+    r = c_data$Value,
+    theta = c_data$Metric,
+    type = "scatterpolar",
+    mode = "lines+markers",
+    fill = "toself",
+    name = country,
+    hoverinfo = "text",
+    text = c_data$label,
+    visible = i == 1
+  )
+
+  # --- Region trace ---
+  traces[[length(traces) + 1]] <- list(
+    r = r_data$Value,
+    theta = r_data$Metric,
+    type = "scatterpolar",
+    mode = "lines+markers",
+    fill = "toself",
+    name = region,
+    hoverinfo = "text",
+    text = paste(region, r_data$Metric),
+    visible = i == 1,
+    marker = list(color = region_color),
+    line = list(color = region_color),
+    fillcolor = region_color
+  )
+}
+
+
+# Build base plot
+p <- plot_ly()
+for (t in traces) {
+  p <- do.call(add_trace, c(list(p), t))
+}
+
+# Add dropdown menu
+buttons <- map2(
+  country_names, seq_along(country_names),
+  function(country, i) {
+    vis <- rep(FALSE, length(traces))
+    vis[(i - 1) * 2 + 1] <- TRUE
+    vis[(i - 1) * 2 + 2] <- TRUE
+    list(label = country, method = "restyle", args = list(list(visible = vis)))
+  }
+)
+
+# Final layout
+p <- layout(p,
+  title = list(
+    text = "Comparative Food Security and Health Indicators: Country vs Region",
+    x = 0.5 
+  ),
+  polar = list(
+    angularaxis = list(rotation = 30),
+    radialaxis = list(visible = TRUE, range = c(0, 1))
+  ),
+  updatemenus = list(
+    list(
+      type = "dropdown",
+      direction = "down",
+      buttons = buttons,
+      x = 0.1,
+      y = 1.2
+    )
+  ),
+  showlegend = TRUE
+)
+
+
+p
+```
