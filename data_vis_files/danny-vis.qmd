@@ -1,0 +1,110 @@
+---
+title: "danny-vis"
+format: 
+    html:
+        embed-resources: true
+---
+
+## Sankey Diagram: Investment Flow and Outcome Impact
+
+### Loading datasets -- Food Security Indicators and SDG Indicators
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+
+food <- read.csv("../clean_data/Food_Security_Clean.csv")
+sdg <- read.csv("../clean_data/SDG_indicators_clean.csv")
+```
+
+Merge datasets
+```{r}
+merged <- inner_join(food, sdg, by = c("country", "year"))
+```
+
+
+### Creating categorized variables, Relevant Columns
+```{r}
+selected_data <- merged %>%
+  select(
+    country, year,
+    water_stress = level_of_water_stress_agriculture_isic4_a01_a0210_a0322_,
+    gov_investment = a1_agriculture_share_of_government_expenditure_,
+    undernourishment = undernourishment_rate
+  ) %>%
+  filter(!is.na(water_stress), !is.na(gov_investment), !is.na(undernourishment))
+
+selected_data <- selected_data %>%
+  mutate(
+    water_stress_level = case_when(
+      water_stress < 10 ~ "Low Water Stress",
+      water_stress < 40 ~ "Medium Water Stress",
+      TRUE ~ "High Water Stress"
+    ),
+    investment_level = case_when(
+      gov_investment < 2 ~ "Low Agri Investment",
+      gov_investment < 5 ~ "Medium Agri Investment",
+      TRUE ~ "High Agri Investment"
+    ),
+    undernourishment_level = case_when(
+      undernourishment < 10 ~ "Low Undernourishment",
+      undernourishment < 25 ~ "Medium Undernourishment",
+      TRUE ~ "High Undernourishment"
+    )
+  )
+
+selected_data <- selected_data %>%
+  mutate(
+    water_stress_level = factor(water_stress_level, levels = c(
+      "High Water Stress", "Medium Water Stress", "Low Water Stress"
+    )),
+    investment_level = factor(investment_level, levels = c(
+      "High Agri Investment", "Medium Agri Investment", "Low Agri Investment"
+    )),
+    undernourishment_level = factor(undernourishment_level, levels = c(
+      "High Undernourishment", "Medium Undernourishment", "Low Undernourishment"
+    ))
+  )
+```
+
+
+### Group + Count Flows
+```{r}
+plot_data <- selected_data %>%
+  count(water_stress_level, investment_level, undernourishment_level)
+```
+
+
+### Making the Diagram
+```{r}
+ggplot(plot_data,
+       aes(axis1 = water_stress_level,
+           axis2 = investment_level,
+           axis3 = undernourishment_level,
+           y = n)) +
+  scale_x_discrete(limits = c("Water Stress", "Gov’t Agri Investment", "Undernourishment"), expand = c(.1, .1)) +
+  geom_alluvium(aes(fill = water_stress_level), width = 1/12, alpha = 0.8) +
+  geom_stratum(width = 1/12, fill = "gray90", color = "black") +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 3.5) +
+  scale_fill_manual(
+    values = c(
+      "Low Water Stress" = "#1f78b4",    
+      "Medium Water Stress" = "#fdbf6f", 
+      "High Water Stress" = "#e31a1c"   
+    )
+  )
+  theme_minimal() +
+  labs(
+    title = "How Water Stress and Investment Relate to Undernourishment",
+    subtitle = "Flows show transitions from environmental pressure to policy response to food insecurity outcomes",
+    y = "Number of Country-Year Observations",
+    x = "",
+    fill = "Water Stress Level"
+  )
+```
+
+High water stress countries (top, red) are substantial in number. Many of them flow into low or medium investment categories, suggesting that investment may not scale adequately with environmental need. Most countries cluster in the low and medium investment levels, regardless of their water stress. Only a small proportion of countries are investing heavily in agriculture, and those aren't exclusively the ones under the greatest water stress. This implies a misalignment between environmental pressure and policy response. A large share of high water stress countries (red flows) end up in medium or high malnourishment, even after passing through varying investment levels. Conversely, low water stress countries (blue flows) tend to arrive at low undernourishment. 
+We can see from this, more broadly, that there is a mismatch of need and action, as many high-stress countries receive low investment. We can also see that investment matters, but isn't everything. Even with medium investment, high-stress countries often still have higher malnourishment
+
+
